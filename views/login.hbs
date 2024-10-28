@@ -1,25 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Admin Dashboard - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/stylesheets/login.css"> <!-- Your existing CSS -->
 </head>
-
 <body>
-    <h1>Login</h1>
-    
-    <form action="/api/v1/login" method="POST">
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" required>
+    <div class="container-fluid">
+        <div class="row auth-wrapper">
+            <div class="col-lg-6 d-none d-lg-block left-section" style="background-image: url('https://images.unsplash.com/photo-1497215728101-856f4ea42174')">
+                <div class="overlay"></div>
+                <div class="content">
+                    <h1>Welcome Back!</h1>
+                    <p>Login to access your dashboard</p>
+                </div>
+            </div>
+            <div class="col-lg-6 col-12 right-section">
+                <div class="login-form">
+                    <div class="logo mb-4">🎯 AdminPanel</div>
+                    <h2 class="mb-4">Login to Dashboard</h2>
+                    <form id="loginForm" action="/api/v1/login" method="POST"> <!-- Updated form action -->
+                        <div class="form-group mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required placeholder="Enter your username">
+                            <div class="invalid-feedback">Please enter your username</div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" required placeholder="Enter your password">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">👁️</button>
+                            </div>
+                            <div class="invalid-feedback">Password must be at least 8 characters</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                Login
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" required>
+    <!-- Modal -->
+    <div class="modal fade" id="loginErrorModal" tabindex="-1" aria-labelledby="loginErrorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginErrorModalLabel">Login Error</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage">Invalid username or password.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <button type="submit">Login</button>
-    </form>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/javascripts/login.js"></script> <!-- Ensure this path is correct -->
 
+    <script>
+        // Lắng nghe sự kiện gửi form
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Ngăn chặn hành động gửi form mặc định
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Kiểm tra điều kiện nhập liệu
+            if (!username || !password) {
+                showModal("Username and password cannot be empty.");
+                return;
+            }
+
+            // Gửi dữ liệu đến API đăng nhập
+            fetch('/api/v1/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Xử lý dữ liệu thành công ở đây (ví dụ: chuyển hướng đến dashboard)
+                console.log(data);
+            })
+            .catch(error => {
+                showModal("Invalid username or password.");
+            });
+        });
+
+        // Hàm hiển thị modal thông báo lỗi
+        function showModal(message) {
+            document.getElementById('errorMessage').innerText = message;
+            const modal = new bootstrap.Modal(document.getElementById('loginErrorModal'));
+            modal.show();
+        }
+    </script>
 </body>
-
 </html>
